@@ -6,7 +6,6 @@ add_library(churchill_library SHARED
     point_search.h
     priority_queue.cpp
     priority_queue.h
-    aligned_point.h
 )
 
 target_include_directories(churchill_library 

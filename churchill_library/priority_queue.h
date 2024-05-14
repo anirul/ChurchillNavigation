@@ -9,13 +9,13 @@
 class PriorityList {
 public:
     PriorityList(size_t capacity) : capacity_(capacity) {}
-    void Insert(const AlignedPoint& point);
+    void Insert(const Point& point);
     void CopyTo(Point* out_points) const;
-    std::list<AlignedPoint>::iterator Begin() { return data_.begin(); }
-    std::list<AlignedPoint>::iterator End() { return data_.end(); }
+    std::list<Point>::iterator Begin() { return data_.begin(); }
+    std::list<Point>::iterator End() { return data_.end(); }
     size_t Size() const { return data_.size(); }
 
 private:
     size_t capacity_;
-    std::list<AlignedPoint> data_;
+    std::list<Point> data_;
 };

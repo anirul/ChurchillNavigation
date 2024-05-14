@@ -7,13 +7,13 @@ void PriorityList::CopyTo(Point* out_points) const {
     }
 }
 
-void PriorityList::Insert(const AlignedPoint& point) {
+void PriorityList::Insert(const Point& point) {
     // Find the appropriate position to insert the point
     auto it = std::find_if(
         data_.begin(), 
         data_.end(), 
-        [&point](const AlignedPoint& p) {
-            return point < p;
+        [&point](const Point& p) {
+            return point.rank < p.rank;
         });
 
     // Insert the point while maintaining sorted order

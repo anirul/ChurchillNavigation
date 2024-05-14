@@ -1,43 +1,43 @@
+
 #pragma once
 
-#include <vector>
-#include <algorithm>
 #include <memory>
-#include <queue>
-#include <limits>
+#include <vector>
 
 #include "point_search.h"
-#include "aligned_point.h"
+#include "priority_queue.h"
 
-struct QuadTreeNode {
-    Rect bounds;
-    std::vector<AlignedPoint> points;
-    std::unique_ptr<QuadTreeNode> nw, ne, sw, se;
-    bool is_leaf;
-    QuadTreeNode(const Rect& b) : bounds(b), is_leaf(true) {}
-};
 
+inline Rect MakeRect(float lx, float ly, float hx, float hy) {
+    return Rect{ lx, ly, hx, hy };
+}
+
+inline bool RectContains(const Rect& r, float x, float y) {
+    return (x >= r.lx && x < r.hx && y >= r.ly && y < r.hy);
+}
+inline bool RectIntersects(const Rect& l, const Rect& r) {
+    return !(
+        r.lx > l.hx || r.hx < l.lx ||
+        r.ly > l.hy || r.hy < l.ly);
+}
+
+// Define the Quadtree Node
 class QuadTree {
 public:
-    QuadTree(const Rect& bounds, size_t capacity) : 
-        root_(new QuadTreeNode(bounds)), max_capacity_(capacity) {}
-    void Insert(const AlignedPoint& point);
-    void Query(
-        const Rect& rect, 
-        std::priority_queue<AlignedPoint, std::vector<AlignedPoint>>& pq, 
-        int32_t count) const;
+    QuadTree(const Rect& boundary)
+        : boundary_(boundary), divided_(false) {}
+    bool Insert(const Point& point);
+    void Query(const Rect& range, PriorityList& found) const;
 
 private:
-    void Insert(QuadTreeNode* node, const AlignedPoint& point);
-    void Subdivide(QuadTreeNode* node);
-    void Query(
-        const QuadTreeNode* node, 
-        const Rect& rect, 
-        std::priority_queue<AlignedPoint, std::vector<AlignedPoint>>& pq,
-        int32_t count) const;
-    bool Contains(const Rect& rect, const AlignedPoint& point) const;
-    bool Intersects(const Rect& a, const Rect& b) const;
+    static const size_t kCapacity = 1024;
+    Rect boundary_;
+    std::vector<Point> points_;
+    bool divided_;
+    std::unique_ptr<QuadTree> northeast_;
+    std::unique_ptr<QuadTree> northwest_;
+    std::unique_ptr<QuadTree> southeast_;
+    std::unique_ptr<QuadTree> southwest_;
 
-    std::unique_ptr<QuadTreeNode> root_;
-    size_t max_capacity_;
+    void Subdivide();
 };
