@@ -1,0 +1,10 @@
+{
+    "name": "churchillnavigation",
+    "version": "0.0.2",
+    "homepage": "https://github.com/anirul/churchillnavigation",
+    "description": "A simple Churchill Navigation DLL with tests",
+    "dependencies": [
+        "abseil",
+        "gtest"
+    ]
+}

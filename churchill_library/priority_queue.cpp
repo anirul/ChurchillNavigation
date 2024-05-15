@@ -13,7 +13,7 @@ void PriorityList::Insert(const Point& point) {
         data_.begin(), 
         data_.end(), 
         [&point](const Point& p) {
-            return point.rank < p.rank;
+            return point.rank > p.rank;
         });
 
     // Insert the point while maintaining sorted order

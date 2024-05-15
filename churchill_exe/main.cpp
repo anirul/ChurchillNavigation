@@ -19,7 +19,7 @@ float GetRandomFloat() {
     static const float upper_bound = 10'000.0f;
 
     // Create a distribution to produce random float values within the specified range
-    static std::uniform_real_distribution<float> dis(lower_bound, upper_bound);
+    std::uniform_real_distribution<float> dis(lower_bound, upper_bound);
 
     // Generate a random float value
     return dis(gen);
@@ -35,7 +35,7 @@ int GetRandomInt() {
     static const int upper_bound = 10'000;
 
     // Create a distribution to produce random integer values within the specified range
-    static std::uniform_int_distribution<int> dis(lower_bound, upper_bound);
+    std::uniform_int_distribution<int> dis(lower_bound, upper_bound);
 
     // Generate a random integer value
     return dis(gen);
@@ -61,7 +61,6 @@ int main(int ac, char** av) {
     }
 
     std::cout << "Creating points..." << std::endl;
-    // Create some points
     std::vector<Point> points;
     for (auto i = 0; i < 10'000'000; ++i) {
         points.push_back(
@@ -74,7 +73,6 @@ int main(int ac, char** av) {
     }
 
     std::cout << "Creating SearchContext..." << std::endl;
-    // Create SearchContext
     SearchContext* sc = create(points.data(), points.data() + points.size());
 
     // Define a search rectangle
@@ -84,12 +82,11 @@ int main(int ac, char** av) {
     Point out_points[20];
 
     std::cout << "Searching for points..." << std::endl;
-    // Search for points
     auto start = std::chrono::high_resolution_clock::now();
     int32_t found_count = search(sc, rect, 20, out_points);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = end - start;
 
+    std::chrono::duration<double> duration = end - start;
     std::cout << "timing: " << duration.count() << "s" << std::endl;
 
     // Output the results

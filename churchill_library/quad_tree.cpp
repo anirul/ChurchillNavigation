@@ -9,8 +9,7 @@ bool QuadTree::Insert(const Point& point) {
         if (points_.size() < kCapacity) {
             points_.push_back(point);
             return true;
-        }
-        else {
+        } else {
             Subdivide();
         }
     }
@@ -28,17 +27,17 @@ void QuadTree::Query(const Rect& range, PriorityList& found) const {
         return;
     }
 
-    for (const auto& p : points_) {
-        if (RectContains(range, p.x, p.y)) {
-            found.Insert(p);
-        }
-    }
-
     if (divided_) {
         northeast_->Query(range, found);
         northwest_->Query(range, found);
         southeast_->Query(range, found);
         southwest_->Query(range, found);
+    } else {
+        for (const auto& p : points_) {
+            if (RectContains(range, p.x, p.y)) {
+                found.Insert(p);
+            }
+        }
     }
 }
 

@@ -1,27 +1,37 @@
 #include "point_search.h"
 
 #include <vector>
-#include <algorithm>
 #include <memory>
 #include <map>
 #include <iostream>
 
 #include "quad_tree.h"
 #include "priority_queue.h"
+#include "vector_storage.h"
+#include "hilbert_grid.h"
+#include "kd_tree.h"
+#include "grid_storage.h"
 
 struct SearchContext {
-    QuadTree tree;
+    std::unique_ptr<StorageInterface> store;
 };
 
 extern "C" __declspec(dllexport) SearchContext* __stdcall 
 create(const Point* points_begin, const Point* points_end) 
 {    
-    float max = std::numeric_limits<float>::max();
-    float min = std::numeric_limits<float>::min();
-    auto sc = new SearchContext{ QuadTree(Rect{ min, min, max, max }) };
+    const float max = 1e11f;
+    const float min = -1e11f;
+    auto sc = new SearchContext{ 
+        // std::make_unique<QuadTree>(Rect{ min, min, max, max })
+        // std::make_unique<KDTree>()
+        // std::make_unique<VectorStorage>(1024 * 1024)
+        // std::make_unique<HilbertStorage>(1024)
+        std::make_unique<GridStorage>(128, 128)
+    };
     for (auto it = points_begin; it != points_end; ++it) {
-        sc->tree.Insert(*it);
+        sc->store->Insert(*it);
     }
+    sc->store->Build();
     return sc;
 }
 
@@ -35,7 +45,7 @@ search(
     if (!sc) return 0;
     int32_t num_copied = 0;
     PriorityList results(static_cast<size_t>(count));
-    sc->tree.Query(rect, results);
+    sc->store->Query(rect, results);
     for (auto it = results.Begin(); it != results.End(); ++it) {
         out_points[num_copied].id = it->id;
         out_points[num_copied].rank = it->rank;
