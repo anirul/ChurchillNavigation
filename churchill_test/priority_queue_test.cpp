@@ -29,26 +29,22 @@ namespace test {
     TEST_F(PriorityQueueTest, PriorityQueueTest_Second) {
         PriorityList pl(4);
         for (int i = 0; i < 100; ++i) {
-            pl.Insert(
-                Point{ 
-                    static_cast<int8_t>(i), 
-                    i, 
-                    static_cast<float>(i), 
-                    static_cast<float>(i) 
-                });
+            pl.Insert(Point{ 
+                static_cast<int8_t>(i), 
+                i, 
+                static_cast<float>(i), 
+                static_cast<float>(i) });
         }
         EXPECT_EQ(pl.Size(), 4);
         for (auto it = pl.Begin(); it != pl.End(); ++it) {
             EXPECT_LT(95, it->rank);
         }
         for (int i = 0; i < 500; ++i) {
-            pl.Insert(
-                Point{
-                    static_cast<int8_t>(i), 
-                    1000 - i, 
-                    static_cast<float>(i), 
-                    static_cast<float>(i) 
-                });
+            pl.Insert(Point{ 
+                static_cast<int8_t>(i), 
+                1000 - i, 
+                static_cast<float>(i), 
+                static_cast<float>(i) });
         }
         EXPECT_EQ(pl.Size(), 4);
         for (auto it = pl.Begin(); it != pl.End(); ++it) {
