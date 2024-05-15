@@ -23,6 +23,12 @@ bool RectContains(const Rect& rect, float x, float y) {
         (y < rect.hy || std::abs(y - rect.hy) < 1e-9);
 }
 
+bool RectCompletelyContains(const Rect& out, const Rect& in) {
+    return
+        out.lx <= in.lx && out.ly <= in.ly &&
+        out.hx >= in.hx && out.hy >= in.hy;
+}
+
 bool RectIntersects(const Rect& a, const Rect& b) {
     return 
         (a.lx < b.hx || std::abs(a.lx - b.hx) < 1e-9) &&

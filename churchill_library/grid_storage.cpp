@@ -100,6 +100,15 @@ void GridStorage::Build() {
 
     temp_points_.clear();
     temp_points_.shrink_to_fit();
+
+    for (int i = 0; i < dx_; ++i) {
+        for (int j = 0; j < dy_; ++j) {
+            auto grid_node = &grid_[i * dy_ + j];
+            for (const auto& point : grid_node->points) {
+                grid_node->priority_list.Insert(point);
+            }
+        }
+    }
 }
 
 void GridStorage::Query(const Rect& range, PriorityList& found) const {
@@ -111,10 +120,14 @@ void GridStorage::Query(const Rect& range, PriorityList& found) const {
     for (int i = start_x; i <= end_x; ++i) {
         for (int j = start_y; j <= end_y; ++j) {
             if (RectIntersects(grid_[i * dy_ + j].boundaries, range)) {
-                for (const auto& point : grid_[i * dy_ + j].points) {
-                    if (point.x >= range.lx && point.x <= range.hx &&
-                        point.y >= range.ly && point.y <= range.hy) {
-                        found.Insert(point);
+                if (RectCompletelyContains(grid_[i * dy_ + j].boundaries, range)) {
+                    found.Fuse(grid_[i * dy_ + j].priority_list);
+                } else {
+                    for (const auto& point : grid_[i * dy_ + j].points) {
+                        if (point.x >= range.lx && point.x <= range.hx &&
+                            point.y >= range.ly && point.y <= range.hy) {
+                            found.Insert(point);
+                        }
                     }
                 }
             }
