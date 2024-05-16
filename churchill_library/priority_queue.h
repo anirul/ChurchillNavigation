@@ -8,7 +8,9 @@
 
 class PriorityList {
 public:
-    PriorityList(size_t capacity) : capacity_(capacity) {}
+    PriorityList(size_t capacity) : capacity_(capacity) {
+        data_.reserve(capacity);
+    }
 
 public:
     void Insert(const Point& point);

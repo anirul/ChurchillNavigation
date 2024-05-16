@@ -26,7 +26,7 @@ create(const Point* points_begin, const Point* points_end)
         // std::make_unique<KDTree>()
         // std::make_unique<VectorStorage>(1024 * 1024)
         // std::make_unique<HilbertStorage>(1024)
-        std::make_unique<GridStorage>(128, 128)
+        std::make_unique<GridStorage>(1024, 1024)
     };
     for (auto it = points_begin; it != points_end; ++it) {
         sc->store->Insert(*it);
@@ -46,6 +46,7 @@ search(
     int32_t num_copied = 0;
     PriorityList results(static_cast<size_t>(count));
     sc->store->Query(rect, results);
+    results.Sort();
     for (auto it = results.Begin(); it != results.End(); ++it) {
         out_points[num_copied].id = it->id;
         out_points[num_copied].rank = it->rank;

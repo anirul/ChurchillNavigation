@@ -1,8 +1,9 @@
 #include "grid_storage.h"
-#include "rect_util.h"
 
 #include <cmath>
 #include <algorithm>
+
+#include "rect_util.h"
 
 namespace {
 
@@ -119,11 +120,13 @@ void GridStorage::Query(const Rect& range, PriorityList& found) const {
 
     for (int i = start_x; i <= end_x; ++i) {
         for (int j = start_y; j <= end_y; ++j) {
-            if (RectIntersects(grid_[i * dy_ + j].boundaries, range)) {
-                if (RectCompletelyContains(grid_[i * dy_ + j].boundaries, range)) {
-                    found.Fuse(grid_[i * dy_ + j].priority_list);
+            const auto& grid_node = grid_[i * dy_ + j];
+            if (RectIntersects(grid_node.boundaries, range)) {
+                if (found.Capacity() == grid_node.priority_list.Capacity() && 
+                    RectCompletelyContains(range, grid_node.boundaries)) {
+                    found.Fuse(grid_node.priority_list);
                 } else {
-                    for (const auto& point : grid_[i * dy_ + j].points) {
+                    for (const auto& point : grid_node.points) {
                         if (point.x >= range.lx && point.x <= range.hx &&
                             point.y >= range.ly && point.y <= range.hy) {
                             found.Insert(point);

@@ -41,7 +41,7 @@ void PriorityList::Sort() {
     // Sort the list
     std::sort(data_.begin(), data_.end(),
         [](const Point& a, const Point& b) {
-            return a.rank > b.rank;
+            return a.rank < b.rank;
         });
 }
 
