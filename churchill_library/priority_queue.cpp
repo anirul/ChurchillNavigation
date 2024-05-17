@@ -12,24 +12,18 @@ void PriorityList::CopyTo(Point* out_points) const {
 }
 
 void PriorityList::Insert(const Point& point) {
-    if (data_.empty()) {
-        min_rank_ = point.rank;
-        max_rank_ = point.rank;
+    if (!Full()) {
         data_.push_back(point);
+        return;
     }
-    else if (data_.size() < capacity_) {
-        data_.push_back(point);
-        min_rank_ = std::min(min_rank_, point.rank);
-        max_rank_ = std::max(max_rank_, point.rank);
-    }
-    else if (point.rank < max_rank_) {
+    if (point.rank < max_rank_) {
         for (auto it = data_.begin(); it != data_.end(); ++it) {
             if (it->rank == max_rank_) {
                 *it = point;
                 break;
             }
         }
-        UpdateMinMaxRanks();
+        UpdateMaxRank();
     }
 }
 
@@ -41,7 +35,7 @@ void PriorityList::FusePriority(const PriorityList& other) {
 
 void PriorityList::FuseSortedRange(const std::vector<Point>& other, Rect Range) {
     for (auto& point : other) {
-        if (point.rank > max_rank_) {
+        if (Full() && point.rank > max_rank_) {
             break;
         }
         if (RectContains(Range, point.x, point.y)) {
@@ -58,11 +52,11 @@ void PriorityList::Sort() {
         });
 }
 
-void PriorityList::UpdateMinMaxRanks() {
-    min_rank_ = std::numeric_limits<int32_t>::max();
-    max_rank_ = std::numeric_limits<int32_t>::min();
-    for (const auto& point : data_) {
-        min_rank_ = std::min(min_rank_, point.rank);
-        max_rank_ = std::max(max_rank_, point.rank);
+void PriorityList::UpdateMaxRank() {
+    if (Full()) {
+        max_rank_ = std::numeric_limits<int32_t>::min();
+        for (const auto& point : data_) {
+            max_rank_ = std::max(max_rank_, point.rank);
+        }
     }
 }

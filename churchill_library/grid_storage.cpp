@@ -110,7 +110,7 @@ void GridStorage::Build() {
             auto grid_node = &grid_[i * dy_ + j];
             std::sort(grid_node->points.begin(), grid_node->points.end(),
                 [](const Point& a, const Point& b) {
-                    return a.rank > b.rank;
+                    return a.rank < b.rank;
                 });
         }
     }
