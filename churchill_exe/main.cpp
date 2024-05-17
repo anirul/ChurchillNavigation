@@ -6,42 +6,18 @@
 
 #include <Windows.h>
 #include <vector>
-#include <random>
 #include <chrono>
 
-float GetRandomFloat() {
-    // Create a random device and seed the random number generator
-    static std::random_device rd;  // Non-deterministic random number generator
-    static std::mt19937 gen(rd()); // Seed the Mersenne Twister RNG
-
-    // Define the range for the random float value
-    static const float lower_bound = -10'000.0f;
-    static const float upper_bound = 10'000.0f;
-
-    // Create a distribution to produce random float values within the specified range
-    std::uniform_real_distribution<float> dis(lower_bound, upper_bound);
-
-    // Generate a random float value
-    return dis(gen);
+float GetRandomFloat(float min = -10'000.0f, float max = 10'000.0f) {
+    return min + (float)rand() / ((float)RAND_MAX / (max - min));
 }
 
-int GetRandomInt() {
-    // Create a random device and seed the random number generator
-    static std::random_device rd;  // Non-deterministic random number generator
-    static std::mt19937 gen(rd()); // Seed the Mersenne Twister RNG
-
-    // Define the range for the random integer value
-    static const int lower_bound = 0;
-    static const int upper_bound = 10'000;
-
-    // Create a distribution to produce random integer values within the specified range
-    std::uniform_int_distribution<int> dis(lower_bound, upper_bound);
-
-    // Generate a random integer value
-    return dis(gen);
+int GetRandomInt(int min, int max) {
+    return min + rand() % (max - min + 1);
 }
 
 int main(int ac, char** av) {
+    srand(0);
     // Load the DLL
     HMODULE hModule = LoadLibrary(av[1]);
     if (!hModule) {
@@ -65,8 +41,8 @@ int main(int ac, char** av) {
     for (auto i = 0; i < 10'000'000; ++i) {
         points.push_back(
             Point{
-                static_cast<int8_t>(GetRandomInt()),
-                GetRandomInt(),
+                static_cast<int8_t>(GetRandomInt(0, 127)),
+                GetRandomInt(0, 10'000),
                 GetRandomFloat(),
                 GetRandomFloat()
             });
