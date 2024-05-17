@@ -17,7 +17,6 @@ private:
     struct GridNode {
         Rect boundaries{};
         std::vector<Point> points;
-        PriorityList priority_list{20};
     };
     Rect total_boundaries_;
     int dx_;

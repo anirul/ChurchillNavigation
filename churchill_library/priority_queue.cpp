@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "rect_util.h"
+
 void PriorityList::CopyTo(Point* out_points) const {
     assert(data_.size() <= capacity_);
     for (const auto& p : data_) {
@@ -20,9 +22,9 @@ void PriorityList::Insert(const Point& point) {
         min_rank_ = std::min(min_rank_, point.rank);
         max_rank_ = std::max(max_rank_, point.rank);
     }
-    else if (point.rank > min_rank_) {
+    else if (point.rank < max_rank_) {
         for (auto it = data_.begin(); it != data_.end(); ++it) {
-            if (it->rank == min_rank_) {
+            if (it->rank == max_rank_) {
                 *it = point;
                 break;
             }
@@ -31,9 +33,20 @@ void PriorityList::Insert(const Point& point) {
     }
 }
 
-void PriorityList::Fuse(const PriorityList& other) {
+void PriorityList::FusePriority(const PriorityList& other) {
     for (auto it = other.Begin(); it != other.End(); ++it) {
         Insert(*it);
+    }
+}
+
+void PriorityList::FuseSortedRange(const std::vector<Point>& other, Rect Range) {
+    for (auto& point : other) {
+        if (point.rank > max_rank_) {
+            break;
+        }
+        if (RectContains(Range, point.x, point.y)) {
+            Insert(point);
+        }
     }
 }
 

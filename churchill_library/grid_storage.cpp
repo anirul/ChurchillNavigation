@@ -2,11 +2,11 @@
 
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 #include "rect_util.h"
 
 namespace {
-
 
     // Helper function to compute exponential boundaries for one half (positive or negative).
     std::vector<double> CalculateHalfBoundaries(
@@ -95,6 +95,9 @@ void GridStorage::Build() {
         if (RectContains(grid_[i * dy_ + j].boundaries, point.x, point.y)) {
             grid_[i * dy_ + j].points.push_back(point);
         } else {
+            std::cerr 
+                << "Point " << point.x << " " << point.y 
+                << " is out of bounds!" << std::endl;
             assert(false);
         }
     }
@@ -105,9 +108,10 @@ void GridStorage::Build() {
     for (int i = 0; i < dx_; ++i) {
         for (int j = 0; j < dy_; ++j) {
             auto grid_node = &grid_[i * dy_ + j];
-            for (const auto& point : grid_node->points) {
-                grid_node->priority_list.Insert(point);
-            }
+            std::sort(grid_node->points.begin(), grid_node->points.end(),
+                [](const Point& a, const Point& b) {
+                    return a.rank > b.rank;
+                });
         }
     }
 }
@@ -121,19 +125,8 @@ void GridStorage::Query(const Rect& range, PriorityList& found) const {
     for (int i = start_x; i <= end_x; ++i) {
         for (int j = start_y; j <= end_y; ++j) {
             const auto& grid_node = grid_[i * dy_ + j];
-            if (RectIntersects(grid_node.boundaries, range)) {
-                if (found.Capacity() == grid_node.priority_list.Capacity() && 
-                    RectCompletelyContains(range, grid_node.boundaries)) {
-                    found.Fuse(grid_node.priority_list);
-                } else {
-                    for (const auto& point : grid_node.points) {
-                        if (point.x >= range.lx && point.x <= range.hx &&
-                            point.y >= range.ly && point.y <= range.hy) {
-                            found.Insert(point);
-                        }
-                    }
-                }
-            }
+            if (grid_node.points.empty()) continue;
+            found.FuseSortedRange(grid_node.points, range);
         }
     }
 }

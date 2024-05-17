@@ -15,7 +15,8 @@ public:
 public:
     void Insert(const Point& point);
     void CopyTo(Point* out_points) const;
-    void Fuse(const PriorityList& other);
+    void FusePriority(const PriorityList& other);
+    void FuseSortedRange(const std::vector<Point>& other, Rect range);
     void Sort();
 
 public:

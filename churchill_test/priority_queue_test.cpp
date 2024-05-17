@@ -52,4 +52,27 @@ namespace test {
         }
     }
 
+    TEST_F(PriorityQueueTest, PriorityQueueTest_FuseSortedTest) {
+        PriorityList pl(4);
+        for (int i = 0; i < 100; ++i) {
+            pl.Insert(Point{
+                static_cast<int8_t>(i), 
+                i, 
+                static_cast<float>(i), 
+                static_cast<float>(i) });
+        }
+        EXPECT_EQ(pl.Size(), 4);
+        for (auto it = pl.Begin(); it != pl.End(); ++it) {
+            EXPECT_LT(95, it->rank);
+        }
+        std::vector<Point> other = {
+            Point({ 1, 200, 1.0, 1.0 }),
+            Point({ 2, 1, 2.0, 2.0 })
+        };
+        pl.FuseSortedRange(other, { 0, 0, 3, 3 });
+        EXPECT_EQ(pl.Size(), 4);
+        pl.Sort();
+        auto it = pl.Begin();
+        EXPECT_EQ(it->rank, 200);
+    }
 }
