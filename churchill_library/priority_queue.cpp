@@ -60,3 +60,11 @@ void PriorityList::UpdateMaxRank() {
         }
     }
 }
+
+size_t PriorityList::Size() const {
+    return data_.size();
+}
+
+bool PriorityList::Full() const {
+    return data_.size() == capacity_;
+}
