@@ -3,12 +3,14 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <omp.h>
 
 #include "rect_util.h"
 
 namespace {
 
-    // Helper function to compute exponential boundaries for one half (positive or negative).
+    // Helper function to compute exponential boundaries for one half 
+    // (positive or negative).
     std::vector<double> CalculateHalfBoundaries(
         double min, 
         double max, 
@@ -57,9 +59,13 @@ namespace {
 
     // Helper function to get the index based on boundaries.
     int GetIndex(const std::vector<double>& boundaries, double value) {
-        auto it = std::upper_bound(boundaries.begin(), boundaries.end(), value);
+        auto it = std::upper_bound(
+            boundaries.begin(), 
+            boundaries.end(), 
+            value);
         return std::max(0, 
-            std::min(static_cast<int>(std::distance(boundaries.begin(), it)) - 1, 
+            std::min(
+                static_cast<int>(std::distance(boundaries.begin(), it)) - 1, 
                 static_cast<int>(boundaries.size() - 2)));
     }
 
@@ -74,9 +80,15 @@ void GridStorage::Build() {
     total_boundaries_ = { -1e10, -1e10, 1e10, 1e10 };
 
     x_boundaries_ = 
-        CalculateExponentialBoundaries(total_boundaries_.lx, total_boundaries_.hx, dx_);
+        CalculateExponentialBoundaries(
+            total_boundaries_.lx, 
+            total_boundaries_.hx, 
+            dx_);
     y_boundaries_ = 
-        CalculateExponentialBoundaries(total_boundaries_.ly, total_boundaries_.hy, dy_);
+        CalculateExponentialBoundaries(
+            total_boundaries_.ly, 
+            total_boundaries_.hy, 
+            dy_);
 
     for (int i = 0; i < dx_; ++i) {
         for (int j = 0; j < dy_; ++j) {
@@ -122,11 +134,46 @@ void GridStorage::Query(const Rect& range, PriorityList& found) const {
     int end_x = GetIndex(x_boundaries_, range.hx);
     int end_y = GetIndex(y_boundaries_, range.hy);
 
-    for (int i = start_x; i <= end_x; ++i) {
-        for (int j = start_y; j <= end_y; ++j) {
-            const auto& grid_node = grid_[i * dy_ + j];
-            if (grid_node.points.empty()) continue;
-            found.FuseSortedRange(grid_node.points, range);
+#ifdef _DEBUG
+    std::cout << "size: " << (range.hx - range.lx) * (range.hy - range.ly) 
+        << "\tblock: ";
+
+    int count = (end_x - start_x) + (end_y - start_y);
+    std::cout << count;
+
+    std::chrono::high_resolution_clock::time_point start = 
+        std::chrono::high_resolution_clock::now();
+#endif
+
+    std::vector<PriorityList> local_founds(
+        omp_get_max_threads(), 
+        PriorityList(found.Capacity()));
+
+#pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+#pragma omp for collapse(2)
+        for (int i = start_x; i <= end_x; ++i) {
+            for (int j = start_y; j <= end_y; ++j) {
+                const auto& grid_node = grid_[i * dy_ + j];
+                if (grid_node.points.empty()) continue;
+                local_founds[thread_id].FuseSortedRange(
+                    grid_node.points, 
+                    range);
+            }
         }
     }
+
+    for (const auto& local_found : local_founds) {
+        found.FusePriority(local_found);
+    }
+
+#ifdef _DEBUG
+    std::chrono::high_resolution_clock::time_point end =
+        std::chrono::high_resolution_clock::now();
+    std::cout << "\ttiming: " 
+        << std::chrono::duration_cast<std::chrono::microseconds>(
+            end - start).count()
+        << "us" << std::endl;
+#endif
 }
